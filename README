@@ -1,13 +1,13 @@
 Whats This?
 ===========
-
 A plugin to watch videos from SC2Casts using XBMC
 
 Installation
 ============
-Download zip file (Note! If you are using Safari, hold the alt button when downloading to prevent Safari from automatically extracting the zip file!). Upload it to your XBMC and install it.
+Download zip file. Upload it to your XBMC and install it.
 
 Who made this?
 ==============
-Kristoffer Petersson made it and published it on Google Code ( http://code.google.com/p/xbmc-plugin-sc2casts/ ), Phek (on xbmc.org) proveded a fix to a script error and G Nyman just put everything together and uploaded it to github.  Bsdfish changed a few lines to make it use the youtube plugin for viewing the actual videos.
-
+The current plugin code was developed by hackebeil. 
+The original code for the plugin, which has been broken since 2013, was developed by Kristoffer Petersson, Phek, G Nyman, and Bsdfish. Thanks to those guys for building the first version of this awesome plugin.
+Additionally, the current version of the plugin contains code fragments of the TwitchTV plugin (as a part of temporary hack). So, thanks as well to the developers of the TwitchTV plugin for putting their code out there.

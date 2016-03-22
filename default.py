@@ -1,11 +1,12 @@
-import sys, xbmc, xbmcplugin, xbmcaddon, sc2casts
+import sys, xbmcplugin, xbmcaddon, sc2casts  
 
-__version__ = "0.4.4"
+__version__ = "0.6"
 __plugin__ = "SC2Casts-" + __version__
-__author__ = "Kristoffer Petersson"
+__author__ = "hackebeil"
 __settings__ = xbmcaddon.Addon(id='plugin.video.sc2casts')
 __language__ = __settings__.getLocalizedString
 
+           
 SC2Casts = sc2casts.SC2Casts()
 
 if (not sys.argv[2]):
@@ -15,7 +16,9 @@ else:
 
     params = SC2Casts.getParams(sys.argv[2])
     get = params.get
-    if (get("action")):
+    if get("action"):
         SC2Casts.action(params)
-
-xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        
+action = SC2Casts.getParams(sys.argv[2])
+if action != 'playTwitch' and action != 'playGames' and action != 'toggleWatched':
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
