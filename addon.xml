@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.sc2casts" name="SC2Casts" version="0.4.7" provider-name="Krill, G.Nyman">
+<addon id="plugin.video.sc2casts" name="SC2Casts" version="0.6" provider-name="hackebeil">
 	<requires>
-		<import addon="xbmc.python" version="1.0"/>
+		<import addon="xbmc.python" version="2.1.0"/>
+		<import addon="script.module.beautifulsoup4" version="4.3.1"/>
+		<import addon='script.module.simplejson' version='2.0.10'/>
+		<import addon="plugin.video.youtube" version="5.1.16"/>	
 	</requires>
 	<extension point="xbmc.python.pluginsource" library="default.py">
 		<provides>video</provides>
@@ -9,6 +12,8 @@
 	<extension point="xbmc.addon.metadata">
 		<platform>all</platform>
 		<summary lang="en">SC2Casts</summary>
-		<description lang="en">A plugin for the site SC2Casts.com - Keeps track of the best Starcraft 2 video casted matches from all over the Internet! --- petersson.krill@gmail.com --- </description>
+		<description lang="en">A plugin for the site SC2Casts.com - Keeps track of the best Starcraft 2 video casted matches from all over the Internet!</description>
+		<disclaimer lang="en">Background image: CC-BY-2.0 by https://www.flickr.com/photos/joo0ey/. Anything else is licensed under AGPLv3.</disclaimer>
+		<license>AGPLv3</license>
 	</extension>
 </addon>

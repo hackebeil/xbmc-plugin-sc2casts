@@ -1,3 +1,24 @@
+v0.6
+----------------------
+- Complete rework by hackebeil. Thanks to the original authors of the plugin (Kristoffer Petersson, Phek, G Nyman, Bsdfish) and all other contributors for their hard work.
+- Source now includes parts of the twitch plugin to allow twitch videos to be played with a start offset. Thanks to StateOfTheArt and ccaspers and all the other contributors for their hard work.
+
+- All old features are repaired.
+- New features:
+--- Twitch support
+--- Browse players
+--- Various context menu option, e.g., Queue all items of a series, Go to players' games, or Go to casters' games
+--- Optional colors
+--- Parsing about 10x faster
+--- Automatically marks watched series
+--- Fanart and logo
+
+
+v0.4.8
+----------------------
+- Work with the new source format of sc2casts page
+- Single game youtube videos should work now as well
+
 v0.4.7
 ----------------------
 - Fix for new 'embed' Youtube link
