@@ -2,25 +2,24 @@ import re
 import sys
 import urllib
 import urllib2
+import urlparse
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-from string import split
-from twitch import TwitchTV
-from bs4 import BeautifulSoup
 import time
 import sqlite3
 import os
-
-
+from string import split
+from twitch import TwitchTV
+from bs4 import BeautifulSoup
 
 class SC2Casts:
    
     #--- Constants
     SC2CASTS_URL = 'http://sc2casts.com'
     VIDEO_URL = 'http://www.youtube.com'
-    VIDEO_PLUGIN_URL = 'plugin://plugin.video.youtube'
+    YOUTUBE_PLUGIN_URL = 'plugin://plugin.video.youtube'
     SELF_PLUGIN_URL = 'plugin://plugin.video.sc2casts'
     DB_FILE = 'watched.db'
     
@@ -73,7 +72,7 @@ class SC2Casts:
         if (action == NavigationConstants.PLAY_GAMES):
             self.showGames(params, True)
         if (action == NavigationConstants.PLAY_TWITCH):
-            self.playVideo(get(NavigationConstants.ID), get(NavigationConstants.START))
+            self.playVideo(get(NavigationConstants.VIDEO_ID), get(NavigationConstants.START))
         if (action == NavigationConstants.FIND_PLAYER):
             self.findPlayer(get(NavigationConstants.URL), get(NavigationConstants.PLAYER_NO))
         if (action == NavigationConstants.TOGGLE_WATCHED):
@@ -183,7 +182,7 @@ class SC2Casts:
             print(str(js))
             addresses = rgex.findall(js)
             print(str(addresses))
-            self.addCategory(otherRounds[i].text,self.getCastsURL('/getRound.php?eid=' + addresses[0][0] + '&rid=' + addresses[0][1] + '&settingz=0 '),NavigationConstants.SHOW_TITLES)                      
+            self.addCategory(otherRounds[i].text,self.getCastsURL('/getRound.php?eid=' + addresses[0][0] + '&rid=' + addresses[0][1] + '&settingz=0'), NavigationConstants.SHOW_TITLES)                      
 
     def browseCasters(self, params, allCasters):
         get = params.get
@@ -279,7 +278,7 @@ class SC2Casts:
             
             ctxList = self.createContextList(event, caster, players, castUrl, boolTrackWatched)
             
-            self.addCategory(videoLabel, castUrl,NavigationConstants.SHOW_GAMES,count=size,ctxItems=ctxList)
+            self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
         
         currentPage = soup.find('a', class_='current')
         if currentPage is not None:
@@ -294,26 +293,52 @@ class SC2Casts:
     def createContextList(self, event, caster, players, castUrl, boolTrackWatched):
         ctxList = []
         if event is not None:
-            ctxUrl = '?action=browseEventRounds&url=' + urllib.quote_plus(self.getCastsURL(event.get('href')))
-            ctxList += [('Go to event: ' + event.text, 'ActivateWindow(video,plugin://plugin.video.sc2casts/'+ctxUrl+')')]
+            ctxList += [(
+                        'Go to event: %s' % event.text, 
+                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                NavigationConstants.ACTION : NavigationConstants.BROWSE_EVENT_ROUNDS, 
+                                NavigationConstants.URL : self.getCastsURL(event.get('href'))
+                            }))
+                        )]
         if caster is not None:
-            ctxUrl = '?action=showTitles&url=' + urllib.quote_plus(self.getCastsURL(caster.get('href')))
-            ctxList += [('Go to caster: ' + caster.text, 'ActivateWindow(video,plugin://plugin.video.sc2casts/'+ctxUrl+')')]
-        
+            ctxList += [(
+                        'Go to caster: %s' % caster.text, 
+                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                NavigationConstants.ACTION : NavigationConstants.SHOW_TITLES, 
+                                NavigationConstants.URL : self.getCastsURL(caster.get('href'))
+                            }))
+                        )]
         for j in range(len(players)):
-            ctxUrl = '?action=findPlayer&playerNo='+str(j)+'&url=' + urllib.quote_plus(self.getCastsURL(castUrl))
-            ctxList += [('Go to player: ' + players[j].text, 'ActivateWindow(video,plugin://plugin.video.sc2casts/'+ctxUrl+')')]
-        
-        ctxUrl = '?action=playGames&url=' + urllib.quote_plus(castUrl)
-        ctxList += [('Queue all videos', 'RunPlugin(plugin://plugin.video.sc2casts/'+ctxUrl+')')]
-        
+            ctxList += [(
+                        'Go to player: %s' % players[j].text, 
+                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                NavigationConstants.ACTION : NavigationConstants.FIND_PLAYER, 
+                                NavigationConstants.PLAYER_NO : j,
+                                NavigationConstants.URL : self.getCastsURL(castUrl)
+                            }))
+                        )]
+
+        ctxList += [(
+                    'Queue all videos', 
+                    'RunPlugin(%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                            NavigationConstants.ACTION : NavigationConstants.PLAY_GAMES, 
+                            NavigationConstants.URL : self.getCastsURL(castUrl)
+                        }))
+                    )]
+                
         if boolTrackWatched:
-            ctxUrl = '?action=toggleWatched&url=' + urllib.quote_plus(castUrl)
-            ctxList += [('Toggle watched', 'RunPlugin(plugin://plugin.video.sc2casts/'+ctxUrl+')')]
+            ctxList += [(
+                        'Toggle watched', 
+                        'RunPlugin(%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                NavigationConstants.ACTION : NavigationConstants.TOGGLE_WATCHED, 
+                                NavigationConstants.URL : self.getCastsURL(castUrl)
+                            }))
+                        )]
             
         return ctxList
         
-    def printTitle(self, matchup, cast, castUrl, players, bestOf, event, rounds, caster, boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster):
+    def printTitle(self, matchup, cast, castUrl, players, bestOf, event, rounds, caster, 
+                   boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster):
         videoLabel = ''
         if boolMatchup and matchup is not None and matchup.text != '':
             if boolColors:
@@ -388,7 +413,7 @@ class SC2Casts:
         if self.addon.getSetting('track') == 'true':
             self.setWatched(get(NavigationConstants.URL))
         
-        link = self.getRequest(self.getCastsURL(get('url')))
+        link = self.getRequest(get('url'))
         soup = self.getSoup(link)
         playersYT = soup.find_all('iframe', id='ytplayer')
         playersTW = soup.find_all('iframe', id='twitchplayer')
@@ -420,9 +445,12 @@ class SC2Casts:
         if self.addon.getSetting('track') == 'true' and action == NavigationConstants.SHOW_GAMES:
             if self.checkWatched(url):
                 info['playcount'] = 1
+                
+        url = '%s/?%s' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                    NavigationConstants.ACTION : action, 
+                                    NavigationConstants.URL : url
+                                }))
         
-        url=(sys.argv[0] + '?url=' + urllib.quote_plus(url) + '&title=' +
-             urllib.quote_plus(title) + '&action=' + urllib.quote_plus(action))
         listitem=xbmcgui.ListItem(title, iconImage='DefaultFolder.png',
                                   thumbnailImage='DefaultFolder.png')
 
@@ -460,19 +488,25 @@ class SC2Casts:
             hrs = re.compile('(\d+?)h').findall(time)
             if len(hrs) == 1:
                 timeInSec += int(hrs[0])*60*60
-            url = splt[0]
-            url = ('%s/?action=playTwitch&id=v%s&start=%i'
-                        %(self.SELF_PLUGIN_URL, url, timeInSec))
+            videoId = splt[0]
+            url = '%s/?%s' %  (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                    NavigationConstants.ACTION : NavigationConstants.PLAY_TWITCH, 
+                                    NavigationConstants.VIDEO_ID : 'v' + videoId,
+                                    NavigationConstants.START : timeInSec
+                                }))
 
         else:
-            url = ('%s/?action=play_video&videoid=%s'
-                        %(self.VIDEO_PLUGIN_URL, url))
+            #special youtube plugin syntax follows, so no constants are used
+            url = '%s/?%s' %  (self.YOUTUBE_PLUGIN_URL, urllib.urlencode({
+                                    'action' : 'play_video', 
+                                    'videoid' : url,
+                                }))
         return (url,timeInSec)
     
     #--- Delegating funtions
-    def playVideo(self, theId, start):
+    def playVideo(self, videoId, start):
         videoQuality = 1
-        simplePlaylist = TwitchTV(xbmc.log).getVideoPlaylist(theId,videoQuality)
+        simplePlaylist = TwitchTV(xbmc.log).getVideoPlaylist(videoId, videoQuality)
         li = xbmcgui.ListItem('', path=simplePlaylist[0][0]) 
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=li)
         
@@ -487,24 +521,21 @@ class SC2Casts:
         soup = self.getSoup(link)
         rgex = re.compile('/player')
         playerUrls = soup.find_all('a', href=rgex)
-        
-        self.showTitles(self.getParams('?action=showTitles&url=' + urllib.quote_plus(self.getCastsURL(playerUrls[int(playerNo)].get('href')))))
+        params = {
+                    NavigationConstants.ACTION : NavigationConstants.SHOW_TITLES, 
+                    NavigationConstants.URL : self.getCastsURL(playerUrls[int(playerNo)].get('href'))
+                }
+        self.showTitles(params)
         
     #--- Utility functions
     def getCastsURL(self, path):
         return self.SC2CASTS_URL + path
     
     def getParams(self, paramList):
-        splitParams = paramList[paramList.find('?') + 1:].split('&')
+        params = urlparse.parse_qs(paramList[paramList.find('?') + 1:])
         paramsFinal = {}
-        for value in splitParams:
-            splitParams = value.split('=')
-            typeT = splitParams[0]
-            if len(splitParams)==2:
-                content = splitParams[1]
-                if typeT == 'url':
-                    content = urllib.unquote_plus(content)
-                paramsFinal[typeT] = content
+        for key in params:
+            paramsFinal[key] = params[key][0]
         return paramsFinal
 
     def getRequest(self, url):
@@ -614,6 +645,6 @@ class NavigationConstants:
     
     URL = 'url'  
     ACTION = 'action' 
-    ID = 'id'
+    VIDEO_ID = 'videoid'
     START = 'start'
     PLAYER_NO = 'playerNo'     
