@@ -181,9 +181,7 @@ class SC2Casts:
         
         for i in range(len(otherRounds)):
             js = otherRounds[i].get('onclick')
-            print(str(js))
             addresses = rgex.findall(js)
-            print(str(addresses))
             self.addCategory(otherRounds[i].text,self.getCastsURL('/getRound.php?eid=' + addresses[0][0] + '&rid=' + addresses[0][1] + '&settingz=0'), NavigationConstants.SHOW_TITLES)                      
 
     def browseCasters(self, params, allCasters):
