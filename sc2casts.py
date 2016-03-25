@@ -568,8 +568,6 @@ class SC2Casts:
     
     #--- Database functions
     def resetWatched(self):
-        window_id = xbmcgui.getCurrentWindowId()
-        print('id : ' + str(window_id))
         doIt = xbmcgui.Dialog().yesno(self.language(31030),self.language(31031),yeslabel=self.language(31032),nolabel=self.language(31033))
         if doIt:
             conn = self.getDBConn()
