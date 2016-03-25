@@ -300,7 +300,7 @@ class SC2Casts:
         eventPattern = re.compile('/event(.*)')
         
         for i in range(len(games)):
-            if boolDates == 'true':
+            if boolDates:
                 date = games[i].previous_sibling
                 if date.name == 'div' and date.get('style') == 'padding-top: 10px;':
                     dateText = ''
