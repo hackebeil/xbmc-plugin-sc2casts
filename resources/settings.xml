@@ -14,5 +14,6 @@
 	</category>
 	<category label="30003">
 		<setting id="track" type="bool" label="30300" default="true" />
+		<setting label="30301" type="action" action="RunPlugin(plugin://plugin.video.sc2casts/?action=resetWatched)"/>
 	</category>
 </settings>

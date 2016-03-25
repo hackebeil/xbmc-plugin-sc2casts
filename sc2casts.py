@@ -77,6 +77,8 @@ class SC2Casts:
             self.findPlayer(get(NavigationConstants.URL), get(NavigationConstants.PLAYER_NO))
         if (action == NavigationConstants.TOGGLE_WATCHED):
             self.toogleWatched(get(NavigationConstants.URL))
+        if (action == NavigationConstants.RESET_WATCHED):
+            self.resetWatched()        
 
     #--- Main menu functions 
     def root(self):
@@ -232,8 +234,9 @@ class SC2Casts:
         # Check if user want to search
         if get(NavigationConstants.ACTION) == NavigationConstants.SHOW_TITLES_SEARCH:
             keyboard = xbmc.Keyboard('')
+            keyboard.setHeading('Search for Events, Players, and/or Casters')
             keyboard.doModal()
-            url = self.getCastsURL('/?q=' + keyboard.getText())
+            url = self.getCastsURL('/?%s' % urllib.urlencode({'q' :keyboard.getText()}))
         link = self.getRequest(url)
 
         start = time.time()
@@ -284,7 +287,7 @@ class SC2Casts:
         if currentPage is not None:
             nextPage = currentPage.find_next('a',class_='paginate',text=re.compile('Next'))
             if nextPage is not None:
-                self.addCategory('Next page -->',self.getCastsURL(nextPage.get('href')),
+                self.addCategory(self.language(31021),self.getCastsURL(nextPage.get('href')),
                          NavigationConstants.SHOW_TITLES, size)
         
         end = time.time()
@@ -294,7 +297,7 @@ class SC2Casts:
         ctxList = []
         if event is not None:
             ctxList += [(
-                        'Go to event: %s' % event.text, 
+                        self.language(31022) % event.text, 
                         'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.BROWSE_EVENT_ROUNDS, 
                                 NavigationConstants.URL : self.getCastsURL(event.get('href'))
@@ -302,7 +305,7 @@ class SC2Casts:
                         )]
         if caster is not None:
             ctxList += [(
-                        'Go to caster: %s' % caster.text, 
+                        self.language(31023) % caster.text, 
                         'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.SHOW_TITLES, 
                                 NavigationConstants.URL : self.getCastsURL(caster.get('href'))
@@ -310,7 +313,7 @@ class SC2Casts:
                         )]
         for j in range(len(players)):
             ctxList += [(
-                        'Go to player: %s' % players[j].text, 
+                        self.language(31024) % players[j].text, 
                         'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.FIND_PLAYER, 
                                 NavigationConstants.PLAYER_NO : j,
@@ -319,7 +322,7 @@ class SC2Casts:
                         )]
 
         ctxList += [(
-                    'Queue all videos', 
+                    self.language(31025), 
                     'RunPlugin(%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                             NavigationConstants.ACTION : NavigationConstants.PLAY_GAMES, 
                             NavigationConstants.URL : self.getCastsURL(castUrl)
@@ -328,7 +331,7 @@ class SC2Casts:
                 
         if boolTrackWatched:
             ctxList += [(
-                        'Toggle watched', 
+                        self.language(31026), 
                         'RunPlugin(%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.TOGGLE_WATCHED, 
                                 NavigationConstants.URL : self.getCastsURL(castUrl)
@@ -374,7 +377,7 @@ class SC2Casts:
         if boolCaster and caster is not None:
             if boolColors:
                 videoLabel += '[COLOR lightcyan]'
-            videoLabel += ' - cast by: ' + caster.text
+            videoLabel += self.language(31027) + caster.text
             if boolColors:
                 videoLabel += '[/COLOR]'
         return videoLabel
@@ -413,7 +416,7 @@ class SC2Casts:
         if self.addon.getSetting('track') == 'true':
             self.setWatched(get(NavigationConstants.URL))
         
-        link = self.getRequest(get('url'))
+        link = self.getRequest(get(NavigationConstants.URL))
         soup = self.getSoup(link)
         playersYT = soup.find_all('iframe', id='ytplayer')
         playersTW = soup.find_all('iframe', id='twitchplayer')
@@ -424,14 +427,14 @@ class SC2Casts:
         count = 0 
         for i in range(len(playersYT)):
             count += 1
-            self.addVideo('Game ' + str(count) + self.getSrcString(Source.YouTube), ytRegex.findall(playersYT[i].get('src'))[0], False, play)
+            self.addVideo(self.language(31020) % count + self.getSrcString(Source.YouTube), ytRegex.findall(playersYT[i].get('src'))[0], False, play)
             
         for i in range(len(playersTW)):
             count += 1
-            self.addVideo('Game ' + str(count) + self.getSrcString(Source.Twitch), twitchRegex.findall(playersTW[i].get('src'))[0], True, play)
+            self.addVideo(self.language(31020) % count + self.getSrcString(Source.Twitch), twitchRegex.findall(playersTW[i].get('src'))[0], True, play)
         
         if play:
-            self.displayNotification('Queued all games from this series.')
+            self.displayNotification(self.language(31028))
 
     def getSrcString(self, source):
         if source == Source.Twitch:
@@ -469,7 +472,7 @@ class SC2Casts:
         liz.setInfo(type='Video', infoLabels={ 'Title': title })
         liz.setProperty('IsPlayable','true')
         if twitch and not toCurrentPL:
-            liz.addContextMenuItems([('Retry seek', 'Seek('+str(playUrl[1])+')')])
+            liz.addContextMenuItems([(self.language(31029), 'Seek('+str(playUrl[1])+')')])
         if toCurrentPL:
             xbmc.PlayList(xbmc.PLAYLIST_VIDEO).add(playUrl[0], listitem=liz)
         else:
@@ -564,6 +567,18 @@ class SC2Casts:
         return BeautifulSoup(text, 'html.parser')
     
     #--- Database functions
+    def resetWatched(self):
+        window_id = xbmcgui.getCurrentWindowId()
+        print('id : ' + str(window_id))
+        doIt = xbmcgui.Dialog().yesno(self.language(31030),self.language(31031),yeslabel=self.language(31032),nolabel=self.language(31033))
+        if doIt:
+            conn = self.getDBConn()
+            c = conn.cursor()
+            c.execute('DELETE FROM watched')
+            conn.commit()
+            conn.close()
+            self.displayNotification('Successfully reset all watched markers.')
+    
     def toogleWatched(self, url):
         watched = self.checkWatched(url)
         conn = self.getDBConn()
@@ -575,7 +590,7 @@ class SC2Casts:
             c.execute('INSERT INTO watched VALUES (?)', urlList)
         conn.commit()
         conn.close()
-        self.displayNotification('Watched status updated.')
+        self.displayNotification(self.language(31034))
 
     def setWatched(self, url):
         if self.checkWatched(url):
@@ -642,6 +657,7 @@ class NavigationConstants:
     PLAY_TWITCH = 'playTwitch'
     FIND_PLAYER = 'findPlayer'
     TOGGLE_WATCHED = 'toggleWatched'
+    RESET_WATCHED = 'resetWatched'
     
     URL = 'url'  
     ACTION = 'action' 

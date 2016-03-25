@@ -6,16 +6,17 @@
 	<string id="30260">Show Dates</string>
 		
     <!-- Category / Title Options strings -->
-    <string id="30002">Title Options</string>	
+    <string id="30002">Titles</string>	
 	<string id="30200">Show Matchup</string>
 	<string id="30210">Show Event</string>
-	<string id="30240">Show Round</string>
+	<string id="30240">Show Number of Rounds</string>
 	<string id="30220">Show Games</string>
 	<string id="30230">Show Caster(s)</string>
 	
 	<!-- Category / Title Options strings -->
-    <string id="30003">Tracking Options</string>	
-	<string id="30300">Track Watched Games</string>
+    <string id="30003">Markers</string>	
+	<string id="30300">Mark watched games</string>
+	<string id="30301">Reset all watched markers</string>
 	
     <!-- Plugin / Root menu strings -->
     <string id="31000">Recent</string>	
@@ -40,4 +41,22 @@
 	<string id="31015">Players</string>
 	<string id="31016">Notable Players</string>
 	<string id="31017">All Players</string>	
+	
+	<string id="31020">Game %d</string>
+	<string id="31021">Next Page --></string>
+	<string id="31022">Go to Event: %s</string>
+	<string id="31023">Go to Caster(s): %s</string>
+	<string id="31024">Go to Player: %s</string>
+	<string id="31025">Queue all videos</string>
+	<string id="31026">Toggle watched</string>
+	<string id="31027"> - cast by: </string>
+	<string id="31028">Queued all games from this series.</string>
+	<string id="31029">Retry seek</string>
+	<string id="31030">Reset watched markers</string>
+	<string id="31031">This will reset all watched markers, which [COLOR red]cannot be undone[/COLOR]. Continue?</string>
+	<string id="31032">Reset</string>
+	<string id="31033">Cancel</string>
+	<string id="31034">Watched marker updated.</string>
+	
+	
 </strings>

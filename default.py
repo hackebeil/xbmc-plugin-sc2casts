@@ -16,6 +16,9 @@ else:
 
 #Determine if endOfDirectory command shall be called. 
 #For some context menu functions this is not the case.
-action = SC2Casts.getParams(sys.argv[2])
-if action != NavigationConstants.PLAY_TWITCH and action != NavigationConstants.PLAY_GAMES and action != NavigationConstants.TOGGLE_WATCHED:
+action = SC2Casts.getParams(sys.argv[2]).get(NavigationConstants.ACTION)
+if (action != NavigationConstants.PLAY_TWITCH and
+    action != NavigationConstants.PLAY_GAMES and
+    action != NavigationConstants.TOGGLE_WATCHED and
+    action != NavigationConstants.RESET_WATCHED):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
