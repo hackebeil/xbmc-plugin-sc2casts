@@ -116,7 +116,7 @@ class SC2Casts:
     def browseEvents(self, params, allEvents):
         get = params.get
         link = self.getRequest(get('url'))
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         allEventsMarker = soup.find('span', text='All Events')
         rgex = re.compile('/event')
         if allEvents:
@@ -156,7 +156,7 @@ class SC2Casts:
     def browseCasters(self, params, allCasters):
         get = params.get
         link = self.getRequest(get('url'))        
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         allCastersMarker = soup.find('span', text='All Casters')
         
         rgex = re.compile('/caster')
@@ -184,7 +184,7 @@ class SC2Casts:
     def browsePlayers(self, params, allPlayers):
         get = params.get
         link = self.getRequest(get('url'))        
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         allPlayersMarker = soup.find('a', text='All Players')
         
         rgex = re.compile('/player')
@@ -268,7 +268,9 @@ class SC2Casts:
     def showTitles(self, params = {}):
         get = params.get
         url = get('url')
-
+        
+    
+        
         # Check if user want to search
         if get('action') == 'showTitlesSearch':
             keyboard = xbmc.Keyboard('')
@@ -276,6 +278,7 @@ class SC2Casts:
             url = self.getCastsURL('/?q=' + keyboard.getText())
         link = self.getRequest(url)
 
+        start = time.time()
         # Get settings
         boolColors = self.__settings__.getSetting('colors') == 'true'
         boolDates = self.__settings__.getSetting('dates') == 'true'
@@ -286,7 +289,7 @@ class SC2Casts:
         boolCaster = self.__settings__.getSetting('caster') == 'true'
         boolTrackWatched = self.__settings__.getSetting('track') == 'true'
         
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         games = soup.find_all('div', class_='latest_series')
         
         size = len(games)
@@ -359,6 +362,9 @@ class SC2Casts:
             if nextPage is not None:
                 self.addCategory('Next page -->',self.getCastsURL(nextPage.get('href')),
                          'showTitles', size)
+        
+        end = time.time()
+        print('time: ' + str(end - start))
             
     def printTitle(self, sourceCode, matchup, cast, castUrl, players, bestOf, event, rounds, caster, boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster):
         videoLabel = ''
@@ -403,7 +409,7 @@ class SC2Casts:
     
     def findPlayer(self, url, playerNo):
         link = self.getRequest(url)
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         rgex = re.compile('/player')
         playerUrls = soup.find_all('a', href=rgex)
         
@@ -416,7 +422,7 @@ class SC2Casts:
             self.setWatched(get('url'))
         
         link = self.getRequest(self.getCastsURL(get('url')))
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         playersYT = soup.find_all('iframe', id='ytplayer')
         playersTW = soup.find_all('iframe', id='twitchplayer')
 
@@ -445,7 +451,7 @@ class SC2Casts:
         get = params.get
         url = get('url')
         link = self.getRequest(url)
-        soup = BeautifulSoup(link, 'html.parser')
+        soup = self.getSoup(link)
         currentRound = soup.find('a', id='selected')
         if currentRound is None:
             self.showTitles(params)
@@ -499,7 +505,6 @@ class SC2Casts:
     
     
     def toogleWatched(self, url):
-        print('WTF5')
         watched = self.checkWatched(url)
         conn = self.getDBConn()
         c = conn.cursor()
@@ -557,6 +562,14 @@ class SC2Casts:
         addonName = theAddon.getAddonInfo('name')
         icon  = theAddon.getAddonInfo('icon')
         xbmc.executebuiltin('Notification(%s, %s, %d, %s)'%(addonName, text, time, icon))
+        
+    def getSoup(self, text):
+        print('Python version: ' + str(sys.version_info))
+        if sys.version_info < (2,7,3):
+            print('Using html5lib')
+            return BeautifulSoup(text, 'html5lib')
+        print('Using python parser')
+        return BeautifulSoup(text, 'html.parser')
         
         
             
