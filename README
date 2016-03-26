@@ -5,8 +5,8 @@ A plugin to watch videos from SC2Casts using XBMC
 Installation
 ============
 You have two options:
-1. Install via repo (*preferred method*). To do this, follow the instructions [here](https://github.com/hackebeil/kodi-repo/releases/tag/0.1.0).
-2. Install via stand-alone zip file. This method will provide no automatic updates. To do this, download the latest zip file [here](https://github.com/hackebeil/xbmc-plugin-sc2casts/releases) and Install it in Kodi via "System -> Settings -> Addons -> Install from zip file".
+1. Install via repo (*preferred method*). To do this, follow the instructions here: https://github.com/hackebeil/kodi-repo/releases/tag/0.1.0).
+2. Install via stand-alone zip file. This method will provide no automatic updates. To do this, download the latest zip file (https://github.com/hackebeil/xbmc-plugin-sc2casts/releases) and install it in Kodi via "System -> Settings -> Addons -> Install from zip file".
 
 Who made this?
 ==============
