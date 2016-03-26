@@ -1,3 +1,7 @@
+v0.62
+----------------------
+First version distributed via its own repository for testing.
+
 v0.6
 ----------------------
 - Complete rework by hackebeil. Thanks to the original authors of the plugin (Kristoffer Petersson, Phek, G Nyman, Bsdfish) and all other contributors for their hard work.

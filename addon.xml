@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.sc2casts" name="SC2Casts" version="0.61" provider-name="hackebeil">
+<addon id="plugin.video.sc2casts" name="SC2Casts" version="0.62" provider-name="hackebeil">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.beautifulsoup4" version="4.3.1"/>
@@ -13,7 +13,7 @@
 	<extension point="xbmc.addon.metadata">
 		<platform>all</platform>
 		<summary lang="en">SC2Casts</summary>
-		<description lang="en">A plugin for the site SC2Casts.com - Keeps track of the best Starcraft 2 video casted matches from all over the Internet!</description>
+		<description lang="en">A plugin for the site SC2Casts.com - Keeps track of the best Starcraft 2 video cast matches from all over the Internet.</description>
 		<disclaimer lang="en">Background image: CC-BY-2.0 by https://www.flickr.com/photos/joo0ey/. Anything else is licensed under AGPLv3.</disclaimer>
 		<license>AGPLv3</license>
 	</extension>
