@@ -1,3 +1,7 @@
+v0.63
+----------------------
+Minor changes to the SC2Casts website called for a bugfix.
+
 v0.62
 ----------------------
 First version distributed via its own repository for testing.
