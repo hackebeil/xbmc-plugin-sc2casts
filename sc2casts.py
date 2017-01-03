@@ -69,7 +69,9 @@ class SC2Casts:
         if (action == NavigationConstants.SHOW_GAMES):
             self.showGames(params,False)
         
-        #special functions 
+        #special functions
+        if (action == NavigationConstants.PLAY_DUMMY):
+            self.playDummy()
         if (action == NavigationConstants.PLAY_GAMES):
             self.showGames(params, True)
         if (action == NavigationConstants.PLAY_TWITCH):
@@ -315,7 +317,7 @@ class SC2Casts:
             # Generate a context menu entry for this series, so that users may more easily 
             # jump to, e.g., one of the players features in the series.
             ctxList = self.createContextList(event, caster, players, castUrl, boolTrackWatched)
-            # Create the acutally list entry.
+            # Create the actual list entry.
             self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
         
         # If the list of series we are inspecting is a multi-page list, 
@@ -488,10 +490,44 @@ class SC2Casts:
             count += 1
             self.addVideo(self.language(31020) % count + self.getSrcString(Source.Twitch), twitchRegex.findall(playersTW[i].get('src'))[0], True, play)
         
+        # If desired, generate more video items to make it 'spoiler free'
+        
+        if self.setting('spoiler_free') == 'true' and not play:
+            # Find the label of the match type
+            matchType = soup.find('div', class_='infolabel').find_all('h2')[0].text;
+            # If all matches are contained within one video, we do not need to unspoiler them
+            if "in 1 video" not in matchType:
+                matchedStr = re.match("Best of ([0-9]+)", matchType)
+                if matchedStr is not None:
+                    # Find out how many matched can be played and how many have been played
+                    boX = int(matchedStr.group(1))
+                    youtube = len(playersYT) != 0
+                    doneSoFar = len(playersYT) if youtube else len(playersTW)
+                    for i in range(doneSoFar+1, boX+1):
+                        self.addDummyVideo(i, youtube)
+        
         # If the user intent was to add the whole series to the queue, we notify them of the success with a notification.
         if play:
             self.displayNotification(self.language(31028))
 
+    def addDummyVideo(self, number, youtube):
+        '''
+        Generate a dummy video list item, so that the true number of games played between two players 
+        cannot be determined at first glance to avoid spoilers.
+        '''
+        title = self.language(31020) % number + self.getSrcString(Source.YouTube if youtube else Source.Twitch)
+        info = {'Title': title}
+        url = '%s/?%s' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                                    NavigationConstants.ACTION : NavigationConstants.PLAY_DUMMY
+                                }))
+        
+        listitem=xbmcgui.ListItem(title, iconImage='DefaultFolder.png',
+                                  thumbnailImage='DefaultFolder.png')
+        listitem.setInfo(type='Video', infoLabels=info)
+        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
+                                    listitem=listitem, isFolder=False,
+                                    totalItems=0)
+                                    
     def getSrcString(self, source):
         '''Generates an (optionally colored) string representing the source of a video.'''
         if source == Source.Twitch:
@@ -629,6 +665,9 @@ class SC2Casts:
         self.showTitles(params)
         
     #--- Utility functions
+    def playDummy(self):
+        self.displayNotification(self.language(31035))
+    
     def getCastsURL(self, path):
         return self.SC2CASTS_URL + path
     
@@ -763,6 +802,7 @@ class NavigationConstants:
     SHOW_GAMES = 'showGames'
     PLAY_GAMES= 'playGames'
     PLAY_TWITCH = 'playTwitch'
+    PLAY_DUMMY = 'playDummy'
     FIND_PLAYER = 'findPlayer'
     TOGGLE_WATCHED = 'toggleWatched'
     RESET_WATCHED = 'resetWatched'

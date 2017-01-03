@@ -4,6 +4,7 @@
 	<string id="30001">Appearance</string>
 	<string id="30250">Show Colors</string>
 	<string id="30260">Show Dates</string>
+	<string id="30270">Make Spoiler Free (Generate Dummy Games in Series)</string>
 		
     <!-- Category / Title Options strings -->
     <string id="30002">Titles</string>	
@@ -13,7 +14,7 @@
 	<string id="30220">Show Games</string>
 	<string id="30230">Show Caster(s)</string>
 	
-	<!-- Category / Title Options strings -->
+	<!-- Marker options -->
     <string id="30003">Markers</string>	
 	<string id="30300">Mark watched games</string>
 	<string id="30301">Reset all watched markers</string>
@@ -57,6 +58,8 @@
 	<string id="31032">Reset</string>
 	<string id="31033">Cancel</string>
 	<string id="31034">Watched marker updated.</string>
+	
+	<string id="31035">This game did not take place.</string>
 	
 	
 </strings>

@@ -4,6 +4,7 @@
 	<category label="30001">
 		<setting id="colors" type="bool" label="30250" default="true" />
 		<setting id="dates" type="bool" label="30260" default="true" />
+		<setting id="spoiler_free" type="bool" label="30270" default="true" />
 	</category>
 	<category label="30002">
 		<setting id="matchup" type="bool" label="30200" default="true" />
