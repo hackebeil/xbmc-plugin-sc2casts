@@ -1,3 +1,8 @@
+v0.64
+----------------------
+- Added the option to make series spoiler free, by adding dummy videos to the list.
+- Fixed Twitch.
+
 v0.63
 ----------------------
 Minor changes to the SC2Casts website called for a bugfix.
@@ -20,7 +25,6 @@ v0.6
 --- Parsing about 10x faster
 --- Automatically marks watched series
 --- Fanart and logo
-
 
 v0.4.8
 ----------------------
