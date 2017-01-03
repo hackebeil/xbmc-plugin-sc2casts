@@ -11,8 +11,8 @@ import time
 import sqlite3
 import os
 from string import split
-from twitch import TwitchTV
 from bs4 import BeautifulSoup
+from threading import Thread
 
 class SC2Casts:
    
@@ -27,6 +27,9 @@ class SC2Casts:
     addon = xbmcaddon.Addon()
     language = addon.getLocalizedString
     setting = addon.getSetting
+    
+    #An offset for twitch videos (needed because a thread needs to access this [hack])
+    twitchOffset = 0
 
     def action(self, params):
         '''Checks the action parameter to determine to which method the work needs to be delegated.'''
@@ -624,29 +627,24 @@ class SC2Casts:
         ''' 
         Plays a twitch video given a time offset (start).
         
-        This solution is super hacked. First the playback is intiated.
-        Next we wait until the player has commenced playback.
-        Additionally, we wait for a grace time of 4 sec.
-        Finally, we jump manually to the desired postion. 
-        
-        Omiting either one of the wait time will result in skip when no video is played.
-        Thus, playback will start at the beginning, which is useless. Users would then
-        have to skip to the desired position manually without knowing where it is.
-        
-        Note: If the user skips in the 4 sec. of grace time, the automatic skip will 
-        be added ontop of the amount already skipped by the user and thus result in skip 
-        to the wrong time code. As of now, I have no idea how to fix this.
+        To get to the right position in the video, the user has to to seek
+        using the context menu item on the video.
         '''
-        videoQuality = 1
-        simplePlaylist = TwitchTV(xbmc.log).getVideoPlaylist(videoId, videoQuality)
-        li = xbmcgui.ListItem('', path=simplePlaylist[0][0]) 
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem=li)
+        self.twitchOffset = start
+        #Thread(target = self.jump).start()
+        self.displayNotification('Please use context menu item on the video to jump to correct position')
+        xbmc.executebuiltin('RunPlugin(plugin://plugin.video.twitch/playVideo/'+videoId+'/)')
         
+    def jump(self):
+        '''
+        Not used right now. Was used to jump to the correct position in the video. 
+        This gives errors for some reason, so the user has to do manually.
+        '''
         #hack to jump to the right position
         while not xbmc.Player().isPlaying():
             xbmc.sleep(100)
         xbmc.sleep(4000)
-        xbmc.Player().seekTime(float(start))
+        xbmc.Player().seekTime(float(self.twitchOffset))
 
     def findPlayer(self, url, playerNo):
         '''
