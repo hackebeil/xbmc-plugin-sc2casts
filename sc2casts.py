@@ -28,9 +28,6 @@ class SC2Casts:
     language = addon.getLocalizedString
     setting = addon.getSetting
     
-    #An offset for twitch videos (needed because a thread needs to access this [hack])
-    twitchOffset = 0
-
     def action(self, params):
         '''Checks the action parameter to determine to which method the work needs to be delegated.'''
         get = params.get
