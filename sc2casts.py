@@ -13,10 +13,6 @@ import os
 import time
 from string import split
 from bs4 import BeautifulSoup
-import subprocess
-
-def log(txt):
-    xbmc.log(msg=txt, level=xbmc.LOGDEBUG)
 
 class SC2Casts:
    
