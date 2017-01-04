@@ -10,9 +10,13 @@ import xbmcplugin
 import time
 import sqlite3
 import os
+import time
 from string import split
 from bs4 import BeautifulSoup
-from threading import Thread
+import subprocess
+
+def log(txt):
+    xbmc.log(msg=txt, level=xbmc.LOGDEBUG)
 
 class SC2Casts:
    
@@ -578,14 +582,19 @@ class SC2Casts:
         playUrl = self.getPlayUrl(url, twitch)
         liz=xbmcgui.ListItem(title, iconImage='DefaultVideo.png',
                                  thumbnailImage='DefaultVideo.png')
-        liz.setInfo(type='Video', infoLabels={ 'Title': title })
+        info = {'Title': title}
+        
+        
         liz.setProperty('IsPlayable','true')
+        
         if twitch and not toCurrentPL:
             liz.addContextMenuItems([(self.language(31029), 'Seek('+str(playUrl[1])+')')])
+        liz.setInfo(type='Video', infoLabels=info)
         if toCurrentPL:
             xbmc.PlayList(xbmc.PLAYLIST_VIDEO).add(playUrl[0], listitem=liz)
         else:
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=playUrl[0], listitem=liz)
+
             
     def getPlayUrl(self, url, twitch):
         ''' 
@@ -608,11 +617,7 @@ class SC2Casts:
             if len(hrs) == 1:
                 timeInSec += int(hrs[0])*60*60
             videoId = splt[0]
-            url = '%s/?%s' %  (self.SELF_PLUGIN_URL, urllib.urlencode({
-                                    NavigationConstants.ACTION : NavigationConstants.PLAY_TWITCH, 
-                                    NavigationConstants.VIDEO_ID : 'v' + videoId,
-                                    NavigationConstants.START : timeInSec
-                                }))
+            url = 'plugin://plugin.video.twitch/playVideo/v'+videoId+'/'
 
         else:
             #special youtube plugin syntax follows, so no constants are used
@@ -623,29 +628,6 @@ class SC2Casts:
         return (url,timeInSec)
     
     #--- Delegating funtions
-    def playVideo(self, videoId, start):
-        ''' 
-        Plays a twitch video given a time offset (start).
-        
-        To get to the right position in the video, the user has to to seek
-        using the context menu item on the video.
-        '''
-        self.twitchOffset = start
-        #Thread(target = self.jump).start()
-        self.displayNotification('Please use context menu item on the video to jump to correct position')
-        xbmc.executebuiltin('RunPlugin(plugin://plugin.video.twitch/playVideo/'+videoId+'/)')
-        
-    def jump(self):
-        '''
-        Not used right now. Was used to jump to the correct position in the video. 
-        This gives errors for some reason, so the user has to do manually.
-        '''
-        #hack to jump to the right position
-        while not xbmc.Player().isPlaying():
-            xbmc.sleep(100)
-        xbmc.sleep(4000)
-        xbmc.Player().seekTime(float(self.twitchOffset))
-
     def findPlayer(self, url, playerNo):
         '''
         Displays a lists of series of a player. 
@@ -775,6 +757,7 @@ class SC2Casts:
             return db
         except:
             return None
+    
     
 class Source:
     Unsupported = 0
