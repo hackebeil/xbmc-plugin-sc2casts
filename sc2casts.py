@@ -528,6 +528,21 @@ class SC2Casts:
                                     listitem=listitem, isFolder=False,
                                     totalItems=0)
                                     
+    def addTwitchExplanation(self):                                    
+        '''
+        Generate a dummy list item that tells the user how to seek to the right place
+        in the twitch video. Since as of now StartOffset is not working. 
+        See: http://trac.kodi.tv/ticket/17006
+        '''
+        title = self.language(31036)
+        info = {'Title': title}       
+        listitem=xbmcgui.ListItem(title, iconImage='DefaultFolder.png',
+                                  thumbnailImage='DefaultFolder.png')
+        listitem.setInfo(type='Video', infoLabels=info)
+        xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url='',
+                                    listitem=listitem, isFolder=False,
+                                    totalItems=0)
+                                    
     def getSrcString(self, source):
         '''Generates an (optionally colored) string representing the source of a video.'''
         if source == Source.Twitch:
@@ -582,6 +597,7 @@ class SC2Casts:
         
         if twitch and not toCurrentPL:
             liz.addContextMenuItems([(self.language(31029), 'Seek('+str(playUrl[1])+')')])
+            self.addTwitchExplanation()
         liz.setInfo(type='Video', infoLabels=info)
         if toCurrentPL:
             xbmc.PlayList(xbmc.PLAYLIST_VIDEO).add(playUrl[0], listitem=liz)
