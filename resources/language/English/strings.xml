@@ -4,7 +4,6 @@
 	<string id="30001">Appearance</string>
 	<string id="30250">Show Colors</string>
 	<string id="30260">Show Dates</string>
-	<string id="30270">Make Spoiler Free (Generate Dummy Games in Series)</string>
 		
     <!-- Category / Title Options strings -->
     <string id="30002">Titles</string>	
@@ -19,6 +18,13 @@
 	<string id="30300">Mark watched games</string>
 	<string id="30301">Reset all watched markers</string>
 	
+	<!-- Spoiler free options -->
+	<string id="30004">Spoilers</string>	
+	<string id="30270">Generate Dummy Games in Series to Hide Actual Game Count</string>
+	<string id="30271">Hide Player Names in Events (Helpful for Group Stages)</string>
+	<string id="30272">... Also Hide Races</string>
+	<string id="30273">Reveal Player Names and Races After Series is Marked as Watched</string>
+		
     <!-- Plugin / Root menu strings -->
     <string id="31000">Recent</string>	
     <string id="31002">Browse</string>
@@ -52,7 +58,7 @@
 	<string id="31026">Toggle watched</string>
 	<string id="31027"> - cast by: </string>
 	<string id="31028">Queued all games from this series.</string>
-	<string id="31029">Retry seek</string>
+	<string id="31029">Seek to game</string>
 	<string id="31030">Reset watched markers</string>
 	<string id="31031">This will reset all watched markers, which [COLOR red]cannot be undone[/COLOR]. Continue?</string>
 	<string id="31032">Reset</string>
@@ -60,6 +66,7 @@
 	<string id="31034">Watched marker updated.</string>
 	
 	<string id="31035">This game did not take place.</string>
+    <string id="31036">To jump to the right position in the video, start it, go back and use the context menu to seek.</string>
 	
 	
 </strings>

@@ -7,10 +7,8 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import time
 import sqlite3
 import os
-import time
 from string import split
 from bs4 import BeautifulSoup
 
@@ -186,7 +184,7 @@ class SC2Casts:
         if currentRound is None:
             self.showTitles(params)
             return  
-        self.addCategory(currentRound.text,url,NavigationConstants.SHOW_TITLES)
+        self.addCategory(currentRound.text,url,NavigationConstants.SHOW_TITLES, isEvent = True)
               
         rgex = re.compile('javascript:toggleRounds8\((\d+),(\d+)\)')
         otherRounds = soup.find_all('a', onclick=rgex)       
@@ -194,7 +192,7 @@ class SC2Casts:
         for i in range(len(otherRounds)):
             js = otherRounds[i].get('onclick')
             addresses = rgex.findall(js)
-            self.addCategory(otherRounds[i].text,self.getCastsURL('/getRound.php?eid=' + addresses[0][0] + '&rid=' + addresses[0][1] + '&settingz=0'), NavigationConstants.SHOW_TITLES)                      
+            self.addCategory(otherRounds[i].text,self.getCastsURL('/getRound.php?eid=' + addresses[0][0] + '&rid=' + addresses[0][1] + '&settingz=0'), NavigationConstants.SHOW_TITLES, isEvent = True)                      
 
     def browseCasters(self, params, allCasters):
         '''Extracts and displays all/top casters from the main "browse" page of the SC2Casts site.'''
@@ -275,7 +273,12 @@ class SC2Casts:
         boolRound = self.setting('round') == 'true'
         boolCaster = self.setting('caster') == 'true'
         boolTrackWatched = self.setting('track') == 'true'
+        boolSpoilerFreeEventsPlayers = self.setting('spoiler_free_player') == 'true'
+        boolSpoilerFreeEventsRace = self.setting('spoiler_free_race') == 'true'
+        boolSpoilerFreeReveal = self.setting('spoiler_free_reveal') == 'true'
         
+        isEvent = get(NavigationConstants.IS_EVENT) == 'true'
+                
         soup = self.getSoup(link)
         # Get all series entries in the hmtl document 
         games = soup.find_all('div', class_='latest_series')
@@ -301,7 +304,7 @@ class SC2Casts:
             if source == Source.Unsupported:
                 continue
            
-           # If the source is supported, search for all remaining bits of information.
+            # If the source is supported, search for all remaining bits of information.
             matchup = games[i].find('span', style='color:#cccccc')
             cast = games[i].find('a', href=castPattern)
             castUrl = cast.get('href')
@@ -311,12 +314,19 @@ class SC2Casts:
             rounds = games[i].find('span', class_='round_name')
             caster = games[i].find('a', href=casterPattern)
             
+            # Check if parts of the title need to be despoilered
+            watched = self.checkWatched(self.getCastsURL(castUrl))
+            despoilerPlayers = isEvent and boolSpoilerFreeEventsPlayers and not (watched and boolSpoilerFreeReveal)
+            despoilerRace = isEvent and boolSpoilerFreeEventsRace and not (watched and boolSpoilerFreeReveal)
+                         
             # Generate a label (the string actually displayed ind the kodi listing) for the series.
             videoLabel = self.printTitle(matchup, cast, castUrl, players, bestOf, event, rounds, caster, 
-                                         boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster)
+                                         boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster, despoilerPlayers, despoilerRace)
+            
             # Generate a context menu entry for this series, so that users may more easily 
             # jump to, e.g., one of the players features in the series.
             ctxList = self.createContextList(event, caster, players, castUrl, boolTrackWatched)
+            
             # Create the actual list entry.
             self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
         
@@ -383,18 +393,21 @@ class SC2Casts:
         return ctxList
         
     def printTitle(self, matchup, cast, castUrl, players, bestOf, event, rounds, caster, 
-                   boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster):
+                   boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster, despoilerPlayers, despoilerRace):
         '''Generates a string represenation of a series (while considering user parameters).'''
         videoLabel = ''
-        if boolMatchup and matchup is not None and matchup.text != '':
+        if boolMatchup and matchup is not None and matchup.text != '' and not despoilerRace:
             if boolColors:
                 videoLabel += '[COLOR skyblue]'
             videoLabel += matchup.text 
             if boolColors:
                 videoLabel += '[/COLOR]'
             videoLabel += ' - '
-        
-        videoLabel += players[0].text + ' vs ' + players[1].text
+            
+        if despoilerPlayers:
+            videoLabel += '...'
+        else:
+            videoLabel += players[0].text + ' vs ' + players[1].text
         
         if boolEvent and event is not None:
             videoLabel += ' - '
@@ -551,7 +564,7 @@ class SC2Casts:
             return ' [COLOR crimson]@ YouTube[/COLOR]'
     
     #--- Functions for adding list items
-    def addCategory(self, title, url, action, count = 0, ctxItems=[]):
+    def addCategory(self, title, url, action, count = 0, ctxItems=[], isEvent = False):
         '''
         Generates a list item other than an actual video. 
         This can be a category but also an event, a list of series, etc.
@@ -560,14 +573,19 @@ class SC2Casts:
         if self.addon.getSetting('track') == 'true' and action == NavigationConstants.SHOW_GAMES:
             if self.checkWatched(url):
                 info['playcount'] = 1
-                
-        url = '%s/?%s' % (self.SELF_PLUGIN_URL, urllib.urlencode({
-                                    NavigationConstants.ACTION : action, 
-                                    NavigationConstants.URL : url
-                                }))
         
+        urlComponents = {
+                            NavigationConstants.ACTION : action, 
+                            NavigationConstants.URL : url
+                        }
+        if isEvent:
+            urlComponents[NavigationConstants.IS_EVENT] = 'true'
+        else:
+            urlComponents[NavigationConstants.IS_EVENT] = 'false'
+        url = '%s/?%s' % (self.SELF_PLUGIN_URL, urllib.urlencode(urlComponents))
         listitem=xbmcgui.ListItem(title, iconImage='DefaultFolder.png',
                                   thumbnailImage='DefaultFolder.png')
+                                
 
         listitem.setInfo(type='Video', infoLabels=info)
 
@@ -796,6 +814,7 @@ class NavigationConstants:
     FIND_PLAYER = 'findPlayer'
     TOGGLE_WATCHED = 'toggleWatched'
     RESET_WATCHED = 'resetWatched'
+    IS_EVENT = 'isEvent'
     
     URL = 'url'  
     ACTION = 'action' 

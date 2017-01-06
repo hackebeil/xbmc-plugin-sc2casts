@@ -4,7 +4,6 @@
 	<category label="30001">
 		<setting id="colors" type="bool" label="30250" default="true" />
 		<setting id="dates" type="bool" label="30260" default="true" />
-		<setting id="spoiler_free" type="bool" label="30270" default="true" />
 	</category>
 	<category label="30002">
 		<setting id="matchup" type="bool" label="30200" default="true" />
@@ -16,5 +15,11 @@
 	<category label="30003">
 		<setting id="track" type="bool" label="30300" default="true" />
 		<setting label="30301" type="action" action="RunPlugin(plugin://plugin.video.sc2casts/?action=resetWatched)"/>
+	</category>
+	<category label="30004">
+		<setting id="spoiler_free" type="bool" label="30270" default="true" />
+		<setting id="spoiler_free_player" type="bool" label="30271" default="false" />
+		<setting id="spoiler_free_race" type="bool" label="30272" default="false" />
+		<setting id="spoiler_free_reveal" type="bool" label="30273" default="false" />
 	</category>
 </settings>
