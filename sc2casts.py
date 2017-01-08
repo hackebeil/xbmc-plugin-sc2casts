@@ -16,6 +16,7 @@ class SC2Casts:
    
     #--- Constants
     SC2CASTS_URL = 'http://sc2casts.com'
+    LIQUID_URL = 'http://www.teamliquid.net'
     VIDEO_URL = 'http://www.youtube.com'
     YOUTUBE_PLUGIN_URL = 'plugin://plugin.video.youtube'
     SELF_PLUGIN_URL = 'plugin://plugin.video.sc2casts'
@@ -35,6 +36,8 @@ class SC2Casts:
             self.rootTop()
         if (action == NavigationConstants.ROOT_BROWSE):
             self.rootBrowse()
+        if (action == NavigationConstants.SHOW_LIVE):
+            self.showLive()
 
         #browse functions
         if (action == NavigationConstants.BROWSE_EVENT_TYPE):
@@ -90,6 +93,7 @@ class SC2Casts:
         self.addCategory(self.language(31002), '', NavigationConstants.ROOT_BROWSE)
         self.addCategory(self.language(31001), '', NavigationConstants.ROOT_TOP)
         self.addCategory(self.language(31003), '', NavigationConstants.SHOW_TITLES_SEARCH)
+        self.addCategory(self.language(31018), '', NavigationConstants.SHOW_LIVE)
 
     def rootTop(self):
         '''Lists all top video categories.'''
@@ -235,6 +239,29 @@ class SC2Casts:
             self.addCategory(casterList[i].string,
                              self.getCastsURL(casterList[i].get('href')),
                              NavigationConstants.SHOW_TITLES, len(casterList))
+            
+    def showLive(self, params = {}):
+        link = self.getRequest(self.LIQUID_URL)        
+        soup = self.getSoup(link)
+        # Find the HTML element that contains the live events and iterate them
+        eventBox = soup.find(id='live_events_block')
+        liveFeeds = eventBox.find_all('div', 'ev-feed')
+        for i in xrange(len(liveFeeds)):
+            # Check that it is SC2; otherwise ignore
+            if '/images/games/1.png)' not in liveFeeds[i].find('div', 'ev-head').find('span', 'ev')['style']:
+                continue
+            # Get the events name and stage
+            eventName = liveFeeds[i].find('div', 'ev-head').find('div', 'ev-ctrl').text
+            eventStage = liveFeeds[i].find('div', 'ev-stage').text
+            # Get the links to the twitch channels where the event is casted
+            eventLinks = liveFeeds[i].find('div', 'ev-body').find('div', 'ev-stream').find_all('a')
+            for j in xrange(len(eventLinks)):
+                eventHost = eventLinks[j].text
+                # Check if it is actually on Twitch
+                if eventLinks[j]['title'].startswith('twitch.tv'):
+                    title = self.language(31037) % (eventHost, eventName, eventStage)
+                    url = 'plugin://plugin.video.twitch/playLive/' + eventHost.lower()
+                    self.addVideo(title, url, False, urlDone = True)
 
     #--- Functions for showing series
     def showTitles(self, params = {}):
@@ -598,7 +625,7 @@ class SC2Casts:
                                     listitem=listitem, isFolder=True,
                                     totalItems=count)
 
-    def addVideo(self, title, url, twitch, toCurrentPL = False):
+    def addVideo(self, title, url, twitch, toCurrentPL = False, urlDone = False):
         '''
         Generates a list entry representing a video.
         
@@ -608,12 +635,13 @@ class SC2Casts:
         This is helpful when the user wants to watch all videos of series or multiple 
         series one after another.
         '''
-        playUrl = self.getPlayUrl(url, twitch)
+        if not urlDone:
+            playUrl = self.getPlayUrl(url, twitch)
+        else:
+            playUrl = (url,)
         liz=xbmcgui.ListItem(title, iconImage='DefaultVideo.png',
                                  thumbnailImage='DefaultVideo.png')
-        info = {'Title': title}
-        
-        
+        info = {'Title': title}              
         liz.setProperty('IsPlayable','true')
         
         if twitch and not toCurrentPL:
@@ -624,7 +652,6 @@ class SC2Casts:
             xbmc.PlayList(xbmc.PLAYLIST_VIDEO).add(playUrl[0], listitem=liz)
         else:
             xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=playUrl[0], listitem=liz)
-
             
     def getPlayUrl(self, url, twitch):
         ''' 
@@ -811,6 +838,7 @@ class NavigationConstants:
     SHOW_TITLES = 'showTitles'
     SHOW_TITLES_SEARCH = 'showTitlesSearch'
     SHOW_GAMES = 'showGames'
+    SHOW_LIVE = 'showLive'
     PLAY_GAMES= 'playGames'
     PLAY_TWITCH = 'playTwitch'
     PLAY_DUMMY = 'playDummy'

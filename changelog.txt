@@ -2,6 +2,7 @@ v0.64
 ----------------------
 - Added the option to make series spoiler free, by adding dummy videos to the list.
 - Also added the option hide player names and races in events, e.g., for group stages.
+- Added experimental support for live streams of events (as listed on TeamLiquid).
 - Fixed Twitch.
 - Other small bugfixes.
 
