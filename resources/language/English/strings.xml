@@ -30,6 +30,7 @@
     <string id="31002">Browse</string>
 	<string id="31001">Top</string>
 	<string id="31003">Search</string>
+	<string id="31018">Live</string>
 	
 	<!-- Plugin / Top menu strings -->
 	<string id="31004">Top All Time</string>
@@ -63,10 +64,10 @@
 	<string id="31031">This will reset all watched markers, which [COLOR red]cannot be undone[/COLOR]. Continue?</string>
 	<string id="31032">Reset</string>
 	<string id="31033">Cancel</string>
-	<string id="31034">Watched marker updated.</string>
-	
+	<string id="31034">Watched marker updated.</string>	
 	<string id="31035">This game did not take place.</string>
     <string id="31036">To jump to the right position in the video, start it, go back and use the context menu to seek.</string>
+    <string id="31037">%s is casting: %s - %s</string>
 	
 	
 </strings>
