@@ -293,43 +293,46 @@ class SC2Casts:
         
         # Iterate of list of series
         for i in range(len(games)):
-            # If there is a date item right before the currently inspected series item, 
-            # we display the date to improve the readability of the final list.
-            # (This only happens if the user selected it in the settings.)
-            size = self.addDateItem(boolDates, games[i], boolColors, size)
-            
-            # Extract the source of the videos of the series.
-            # Youtube or twitch are ok, anything else will be skipped.
-            source = self.checkSource(games[i])
-            if source == Source.Unsupported:
-                continue
-           
-            # If the source is supported, search for all remaining bits of information.
-            matchup = games[i].find('span', style='color:#cccccc')
-            cast = games[i].find('a', href=castPattern)
-            castUrl = cast.get('href')
-            players = cast.find_all('b')
-            bestOf = bestOfPattern.findall(players[1].next_sibling)
-            event = games[i].find('a', href=eventPattern)
-            rounds = games[i].find('span', class_='round_name')
-            caster = games[i].find('a', href=casterPattern)
-            
-            # Check if parts of the title need to be despoilered
-            watched = self.checkWatched(self.getCastsURL(castUrl))
-            despoilerPlayers = isEvent and boolSpoilerFreeEventsPlayers and not (watched and boolSpoilerFreeReveal)
-            despoilerRace = isEvent and boolSpoilerFreeEventsRace and not (watched and boolSpoilerFreeReveal)
-                         
-            # Generate a label (the string actually displayed ind the kodi listing) for the series.
-            videoLabel = self.printTitle(matchup, cast, castUrl, players, bestOf, event, rounds, caster, 
-                                         boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster, despoilerPlayers, despoilerRace)
-            
-            # Generate a context menu entry for this series, so that users may more easily 
-            # jump to, e.g., one of the players features in the series.
-            ctxList = self.createContextList(event, caster, players, castUrl, boolTrackWatched)
-            
-            # Create the actual list entry.
-            self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
-        
+            try:
+                # If there is a date item right before the currently inspected series item, 
+                # we display the date to improve the readability of the final list.
+                # (This only happens if the user selected it in the settings.)
+                size = self.addDateItem(boolDates, games[i], boolColors, size)
+                
+                # Extract the source of the videos of the series.
+                # Youtube or twitch are ok, anything else will be skipped.
+                source = self.checkSource(games[i])
+                if source == Source.Unsupported:
+                    continue
+               
+                # If the source is supported, search for all remaining bits of information.
+                matchup = games[i].find('span', style='color:#cccccc')
+                cast = games[i].find('a', href=castPattern)
+                castUrl = cast.get('href')
+                players = cast.find_all('b')
+                #TODO: Handle problem when instead of players it only says, for example, "Decider Match" (only happens rarely)
+                bestOf = bestOfPattern.findall(players[1].next_sibling)
+                event = games[i].find('a', href=eventPattern)
+                rounds = games[i].find('span', class_='round_name')
+                caster = games[i].find('a', href=casterPattern)
+                
+                # Check if parts of the title need to be despoilered
+                watched = self.checkWatched(self.getCastsURL(castUrl))
+                despoilerPlayers = isEvent and boolSpoilerFreeEventsPlayers and not (watched and boolSpoilerFreeReveal)
+                despoilerRace = isEvent and boolSpoilerFreeEventsRace and not (watched and boolSpoilerFreeReveal)
+                             
+                # Generate a label (the string actually displayed ind the kodi listing) for the series.
+                videoLabel = self.printTitle(matchup, cast, castUrl, players, bestOf, event, rounds, caster, 
+                                             boolColors, boolMatchup, boolNr_games, boolEvent, boolRound, boolCaster, despoilerPlayers, despoilerRace)
+                
+                # Generate a context menu entry for this series, so that users may more easily 
+                # jump to, e.g., one of the players features in the series.
+                ctxList = self.createContextList(event, caster, players, castUrl, boolTrackWatched)
+                
+                # Create the actual list entry.
+                self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
+            except Exception as e:
+                xbmc.log(str(e), level=xbmc.LOGFATAL)
         # If the list of series we are inspecting is a multi-page list, 
         # we extract the next page link and add a navigation entry to the final list.
         currentPage = soup.find('a', class_='current')
@@ -350,7 +353,7 @@ class SC2Casts:
         if event is not None:
             ctxList += [(
                         self.language(31022) % event.text, 
-                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                        'ActivateWindow(Videos,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.BROWSE_EVENT_ROUNDS, 
                                 NavigationConstants.URL : self.getCastsURL(event.get('href'))
                             }))
@@ -358,7 +361,7 @@ class SC2Casts:
         if caster is not None:
             ctxList += [(
                         self.language(31023) % caster.text, 
-                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                        'ActivateWindow(Videos,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.SHOW_TITLES, 
                                 NavigationConstants.URL : self.getCastsURL(caster.get('href'))
                             }))
@@ -366,7 +369,7 @@ class SC2Casts:
         for j in range(len(players)):
             ctxList += [(
                         self.language(31024) % players[j].text, 
-                        'ActivateWindow(video,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
+                        'ActivateWindow(Videos,%s/?%s)' % (self.SELF_PLUGIN_URL, urllib.urlencode({
                                 NavigationConstants.ACTION : NavigationConstants.FIND_PLAYER, 
                                 NavigationConstants.PLAYER_NO : j,
                                 NavigationConstants.URL : self.getCastsURL(castUrl)
