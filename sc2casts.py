@@ -11,6 +11,7 @@ import sqlite3
 import os
 from string import split
 from bs4 import BeautifulSoup
+import traceback
 
 class SC2Casts:
    
@@ -338,7 +339,10 @@ class SC2Casts:
                 castUrl = cast.get('href')
                 players = cast.find_all('b')
                 #TODO: Handle problem when instead of players it only says, for example, "Decider Match" (only happens rarely)
-                bestOf = bestOfPattern.findall(players[1].next_sibling)
+                if len(players) == 2:
+                    bestOf = bestOfPattern.findall(players[1].next_sibling)
+                else:
+                    bestOf = bestOfPattern.findall(players[0].next_sibling)
                 event = games[i].find('a', href=eventPattern)
                 rounds = games[i].find('span', class_='round_name')
                 caster = games[i].find('a', href=casterPattern)
@@ -360,6 +364,7 @@ class SC2Casts:
                 self.addCategory(videoLabel, self.getCastsURL(castUrl), NavigationConstants.SHOW_GAMES, count=size, ctxItems=ctxList)
             except Exception as e:
                 xbmc.log(str(e), level=xbmc.LOGFATAL)
+                traceback.print_exc()
         # If the list of series we are inspecting is a multi-page list, 
         # we extract the next page link and add a navigation entry to the final list.
         currentPage = soup.find('a', class_='current')
@@ -437,7 +442,10 @@ class SC2Casts:
         if despoilerPlayers:
             videoLabel += '...'
         else:
-            videoLabel += players[0].text + ' vs ' + players[1].text
+            if len(players) == 2:
+                videoLabel += players[0].text + ' vs ' + players[1].text
+            else:
+                videoLabel += players[0].text
         
         if boolEvent and event is not None:
             videoLabel += ' - '
