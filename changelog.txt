@@ -1,3 +1,8 @@
+v0.65
+----------------------
+- Fixed error related to decider matches etc.
+- Fixed live streaming error.
+
 v0.64
 ----------------------
 - Added the option to make series spoiler free, by adding dummy videos to the list.

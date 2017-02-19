@@ -226,7 +226,6 @@ class SC2Casts:
         link = self.getRequest(get(NavigationConstants.URL))        
         soup = self.getSoup(link)
         allPlayersMarker = soup.find('a', text='All Players')
-        
         rgex = re.compile('/player')
         
         if allPlayers:
@@ -260,8 +259,12 @@ class SC2Casts:
                 eventHost = eventLinks[j].text
                 # Check if it is actually on Twitch
                 if eventLinks[j]['title'].startswith('twitch.tv'):
+                    subSite = self.getRequest(self.LIQUID_URL + eventLinks[j]['href'])        
+                    subSiteSoup = self.getSoup(subSite)
+                    iframe = subSiteSoup.find('iframe', class_='videoplayer')
+                    m = re.search('\=(.*)', iframe['src'])
                     title = self.language(31037) % (eventHost, eventName, eventStage)
-                    url = 'plugin://plugin.video.twitch/playLive/' + eventHost.lower()
+                    url = 'plugin://plugin.video.twitch/playLive/' + m.group(1)
                     self.addVideo(title, url, False, urlDone = True)
 
     #--- Functions for showing series
@@ -338,7 +341,6 @@ class SC2Casts:
                 cast = games[i].find('a', href=castPattern)
                 castUrl = cast.get('href')
                 players = cast.find_all('b')
-                #TODO: Handle problem when instead of players it only says, for example, "Decider Match" (only happens rarely)
                 if len(players) == 2:
                     bestOf = bestOfPattern.findall(players[1].next_sibling)
                 else:
