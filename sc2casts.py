@@ -342,9 +342,9 @@ class SC2Casts:
                 castUrl = cast.get('href')
                 players = cast.find_all('b')
                 if len(players) == 2:
-                    bestOf = bestOfPattern.findall(players[1].next_sibling)
+                    bestOf = bestOfPattern.findall(str(players[1].next_sibling))
                 else:
-                    bestOf = bestOfPattern.findall(players[0].next_sibling)
+                    bestOf = bestOfPattern.findall(str(players[0].next_sibling))
                 event = games[i].find('a', href=eventPattern)
                 rounds = games[i].find('span', class_='round_name')
                 caster = games[i].find('a', href=casterPattern)
