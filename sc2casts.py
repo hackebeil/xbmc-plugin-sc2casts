@@ -19,7 +19,7 @@ class SC2Casts:
     SC2CASTS_URL = 'http://sc2casts.com'
     LIQUID_URL = 'http://www.teamliquid.net'
     VIDEO_URL = 'http://www.youtube.com'
-    YOUTUBE_PLUGIN_URL = 'plugin://plugin.video.youtube'
+    YOUTUBE_PLUGIN_URL = 'plugin://plugin.video.youtube/play'
     SELF_PLUGIN_URL = 'plugin://plugin.video.sc2casts'
     DB_FILE = 'watched.db'
     
@@ -688,10 +688,7 @@ class SC2Casts:
 
         else:
             #special youtube plugin syntax follows, so no constants are used
-            url = '%s/?%s' %  (self.YOUTUBE_PLUGIN_URL, urllib.urlencode({
-                                    'action' : 'play_video', 
-                                    'videoid' : url,
-                                }))
+            url = '%s/?%s' %  (self.YOUTUBE_PLUGIN_URL, 'video_id=' + url.replace('?', '&'))
         return (url,timeInSec)
     
     #--- Delegating funtions

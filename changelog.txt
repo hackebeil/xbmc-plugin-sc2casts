@@ -1,3 +1,11 @@
+v0.67
+----------------------
+- Compatibility with newer Youtube plugin versions.
+
+v0.66
+----------------------
+- Fixed parsing error.
+
 v0.65
 ----------------------
 - Fixed error related to decider matches etc.
